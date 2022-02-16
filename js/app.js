@@ -5,122 +5,111 @@ let renderer;
 let scene;
 let mesh;
 
+window.addEventListener("resize", onWindowResize);
+window.addEventListener("mousedown", onMouseDown);
+init();
+
 function init() {
+  container = document.querySelector("#scene-container");
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color("blue");
 
- container = document.querySelector('#scene-container');
+  createCamera();
+  createControls();
+  createLights();
+  createMeshes();
+  createRenderer();
 
- // create a Scene
- scene = new THREE.Scene();
-
- // Set the background color
- scene.background = new THREE.Color('blue');
-
- createCamera();
- createControls();
- createLights();
- createMeshes();
- createRenderer();
-
- // start the animation loop
- renderer.setAnimationLoop(() => {
-
- update();
- render();
-
-    });
+  renderer.setAnimationLoop(() => {
+    update();
+    render();
+  });
 }
 
-
 function createCamera() {
+  camera = new THREE.PerspectiveCamera(
+    35, // FOV
+    container.clientWidth / container.clientHeight, // aspect
+    0.1, // near clipping plane
+    100 // far clipping plane
+  );
 
- camera = new THREE.PerspectiveCamera(
- 35, // FOV
- container.clientWidth / container.clientHeight, // aspect
-
- 0.1, // near clipping plane
- 100, // far clipping plane
-    );
-
- camera.position.set(-4, 4, 10);
-
-
+  camera.position.set(-4, 0, 10);
 }
 
 function createControls() {
-
- controls = new THREE.OrbitControls( camera, container );
-
+  controls = new THREE.OrbitControls(camera, container);
 }
 
 function createLights() {
+  const hemisphereLight = new THREE.HemisphereLight(0xddeeff, 0x200020, 3);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 
- const ambientLight = new THREE.HemisphereLight(
- 0xddeeff, 
- 0x200020, 
- 3, 
-    );
+  hemisphereLight.position.set(-50, 2, 4);
+  directionalLight.position.set(-50, 2, 4);
 
- scene.add(ambientLight);
-
+  scene.add(hemisphereLight);
+  scene.add(directionalLight);
 }
 
 function createMeshes() {
+  const loader = new THREE.TextureLoader();
+  const geometry = new THREE.BoxBufferGeometry(4, 4, 4);
+  
+  const materials = [
+    new THREE.MeshBasicMaterial({
+      map: loader.load("resources/images/platform1.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loader.load("resources/images/platform2.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loader.load("resources/images/platform3.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loader.load("resources/images/platform4.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loader.load("resources/images/platform5.jpg"),
+    }),
+    new THREE.MeshBasicMaterial({
+      map: loader.load("resources/images/platform6.jpg"),
+    }),
+  ];
 
- const geometry = new THREE.BoxBufferGeometry(4,4,4)
- const material = new THREE.MeshStandardMaterial({ color: 0x80f880 });
-
- mesh = new THREE.Mesh(geometry, material);
-
- scene.add(mesh);
-
+  mesh = new THREE.Mesh(geometry, materials);
+  scene.add(mesh);
 }
 
 function createRenderer() {
-
- renderer = new THREE.WebGLRenderer({ antialias: true });
- renderer.setSize(container.clientWidth, container.clientHeight);
-
- renderer.setPixelRatio(window.devicePixelRatio);
-
- renderer.gammaFactor = 2.2;
- renderer.gammaOutput = true;
-
- renderer.physicallyCorrectLights = true;
-
-
-container.appendChild(renderer.domElement);
-
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.physicallyCorrectLights = true;
+  container.appendChild(renderer.domElement);
 }
 
-// perform any updates to the scene, called once per frame
-// avoid heavy computation here
-function update() {
-
- // increase the mesh's rotation each frame
- mesh.rotation.z += 0.01;
- mesh.rotation.x += 0.01;
- mesh.rotation.y += 0.01;
-
-}
-// render, or 'draw a still image', of the scene
 function render() {
+  renderer.render(scene, camera);
+}
 
- renderer.render(scene, camera);
-
+function update() {
+  mesh.rotation.z += 0.01;
+  mesh.rotation.x += 0.01;
+  mesh.rotation.y += 0.01;
 }
 
 function onWindowResize() {
-
- console.log('You resized the browser window!');
- // set the aspect ratio to match the new browser window aspect ratio
- camera.aspect = container.clientWidth / container.clientHeight;
-
- // update the camera's frustum
- camera.updateProjectionMatrix();
-
- renderer.setSize(container.clientWidth, container.clientHeight);
+  console.log("You resized the browser window!");
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
 }
 
-window.addEventListener('resize', onWindowResize);
+function randomColour() {
+  return "#" + Math.floor(Math.random() * 16777215).toString(16);
+}
 
-init();
+function onMouseDown() {
+  console.log("mouse down");
+}
