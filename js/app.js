@@ -30,11 +30,11 @@ function createCamera() {
   camera = new THREE.PerspectiveCamera(
     35, // FOV
     container.clientWidth / container.clientHeight, // aspect
-    0.1, // near clipping plane
+    1, // near clipping plane
     100 // far clipping plane
   );
 
-  camera.position.set(-4, 0, 10);
+  camera.position.set(0, 0, 10);
 }
 
 function createControls() {
@@ -54,26 +54,26 @@ function createLights() {
 
 function createMeshes() {
   const loader = new THREE.TextureLoader();
-  const geometry = new THREE.BoxBufferGeometry(4, 4, 4);
+  const geometry = new THREE.BoxBufferGeometry(8, 4, 4);
   
   const materials = [
     new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform1.jpg"),
+      map: loader.load("resources/images/platform1.jpg"),side: THREE.BackSide 
     }),
     new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform2.jpg"),
+      map: loader.load("resources/images/platform2.jpg"),side: THREE.BackSide 
     }),
     new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform3.jpg"),
+      map: loader.load("resources/images/platform3.jpg"),side: THREE.BackSide 
     }),
     new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform4.jpg"),
+      map: loader.load("resources/images/platform4.jpg"),side: THREE.BackSide 
     }),
     new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform5.jpg"),
+      map: loader.load("resources/images/platform5.jpg"),side: THREE.BackSide 
     }),
     new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform6.jpg"),
+      map: loader.load("resources/images/platform6.jpg"),side: THREE.BackSide 
     }),
   ];
 
@@ -94,9 +94,9 @@ function render() {
 }
 
 function update() {
-  mesh.rotation.z += 0.01;
-  mesh.rotation.x += 0.01;
-  mesh.rotation.y += 0.01;
+  // mesh.rotation.z += 0.01;
+  // mesh.rotation.x += 0.01;
+  // mesh.rotation.y += 0.01;
 }
 
 function onWindowResize() {
