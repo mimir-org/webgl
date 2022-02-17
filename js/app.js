@@ -3,10 +3,11 @@ let camera;
 let controls;
 let renderer;
 let scene;
-let mesh;
+let boxMeshTexture;
+let boxMeshColor;
 
-var boxWidth = 10;
-var boxHeight = 5;
+var boxWidth = 5;
+var boxHeight = 2.6;
 var boxDepth = 5;
 
 var cameraFov = 35;
@@ -15,8 +16,8 @@ var cameraNear = 0.1;
 var cameraFar = 1000;
 
 var cameraPosX = 0;
-var cameraPosY = 0;
-var cameraPosZ = (boxWidth * boxHeight) / 3;
+var cameraPosY = 2;
+var cameraPosZ = (boxWidth * boxHeight) / 1.4;
 
 window.addEventListener("resize", onWindowResize);
 window.addEventListener("mousedown", onMouseDown);
@@ -59,58 +60,56 @@ function createLights() {
   const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
 
   hemisphereLight.position.set(0, 0, 0);
-  directionalLight.position.set(0, 0, 10);
+  directionalLight.position.set(0, 0, 0);
 
   scene.add(hemisphereLight);
   scene.add(directionalLight);
 }
 
 function createMeshes() {
-
   const loader = new THREE.TextureLoader();
   const geometry = new THREE.BoxBufferGeometry(boxWidth, boxHeight, boxDepth);
+  const geometry2 = new THREE.BoxBufferGeometry(boxWidth, boxHeight, boxDepth);
   
-  const materials = [
-    new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform1.jpg"),side: THREE.BackSide //Right
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform2.jpg"),side: THREE.BackSide //Left
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform3.jpg"),side: THREE.BackSide //Top
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform4.jpg"),side: THREE.BackSide //Bottom
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform5.jpg"),side: THREE.BackSide //Front
-    }),
-    new THREE.MeshBasicMaterial({
-      map: loader.load("resources/images/platform6.jpg"),side: THREE.BackSide //Back
-    }),
-  ];
-
-  //Repeating testure START
-  var textureRoof = loader.load( 'resources/images/wall.jpg', function () {
+  var textureRoof = loader.load( 'resources/images/roof.png', function () {
     textureRoof.wrapS = textureRoof.wrapT = THREE.RepeatWrapping;
     textureRoof.offset.set( 0, 0 );
-    textureRoof.repeat.set( 1, 1 );
-} );
+    textureRoof.repeat.set( 1, 0 );
+  });
 
-const materials2 = [
-  new THREE.MeshPhongMaterial( { color: 0xffffff, specular:0x111111, shininess: 10, map: textureRoof, side: THREE.BackSide} ), //Right
-  new THREE.MeshPhongMaterial( { color: 0xffffff, specular:0x111111, shininess: 10, map: textureRoof, side: THREE.BackSide} ), //Left
-  new THREE.MeshPhongMaterial( { color: 0xffffff, specular:0x111111, shininess: 10, map: textureRoof, side: THREE.BackSide} ), //Roof
-  new THREE.MeshPhongMaterial( { color: 0xffffff, specular:0x111111, shininess: 10, map: textureRoof, side: THREE.BackSide} ), //Floor
-  new THREE.MeshPhongMaterial( { color: 0xffffff, specular:0x111111, shininess: 10, map: textureRoof, side: THREE.BackSide} ), //Front
-  new THREE.MeshPhongMaterial( { color: 0xffffff, specular:0x111111, shininess: 10, map: textureRoof, side: THREE.BackSide} ), //Back
-];
+  var textureWall = loader.load( 'resources/images/wall.png', function () {
+    textureWall.wrapS = textureRoof.wrapT = THREE.RepeatWrapping;
+    textureWall.offset.set( 0, 0 );
+    textureWall.repeat.set( 1, 1 );
+  });
 
-//Repeating testure END
+  var textureFloor = loader.load( 'resources/images/floor.png', function () {
+    textureFloor.wrapS = textureRoof.wrapT = THREE.RepeatWrapping;
+    textureFloor.offset.set( 0, 0 );
+    textureFloor.repeat.set( 1, 1 );
+  });
 
-  mesh = new THREE.Mesh(geometry, materials2);
-  scene.add(mesh);
+const textureMaterialArray = [];
+textureMaterialArray.push(new THREE.MeshBasicMaterial( { map: textureWall, transparent: true, opacity: 0.9, side: THREE.BackSide })); //Right
+textureMaterialArray.push(new THREE.MeshBasicMaterial( { map: textureWall, transparent: true, opacity: 0.9, side: THREE.BackSide })); //Left
+textureMaterialArray.push(new THREE.MeshBasicMaterial( { map: textureRoof, transparent: true, opacity: 0.9, side: THREE.BackSide })); //Top
+textureMaterialArray.push(new THREE.MeshBasicMaterial( { map: textureFloor, transparent: true, opacity: 0.9, side: THREE.BackSide })); //Bottom
+textureMaterialArray.push(new THREE.MeshBasicMaterial( { map: textureWall, transparent: true, opacity: 0.9, side: THREE.BackSide })); //Front
+textureMaterialArray.push(new THREE.MeshBasicMaterial( { map: textureWall, transparent: true, opacity: 0.9, side: THREE.BackSide })); //Back
+
+const colorMaterialArray = [];
+colorMaterialArray.push(new THREE.MeshBasicMaterial( { color: 0x838587, side: THREE.BackSide })); //Right
+colorMaterialArray.push(new THREE.MeshBasicMaterial( { color: 0x838587, side: THREE.BackSide })); //Left
+colorMaterialArray.push(new THREE.MeshBasicMaterial( { color: 0x989a9b, side: THREE.BackSide })); //Top
+colorMaterialArray.push(new THREE.MeshBasicMaterial( { color: 0x757777, side: THREE.BackSide })); //Bottom
+colorMaterialArray.push(new THREE.MeshBasicMaterial( { color: 0x757777, side: THREE.BackSide })); //Front
+colorMaterialArray.push(new THREE.MeshBasicMaterial( { color: 0x757777, side: THREE.BackSide })); //BAck
+
+boxMeshTexture = new THREE.Mesh(geometry, textureMaterialArray);
+boxMeshColor = new THREE.Mesh(geometry2, colorMaterialArray);
+
+scene.add(boxMeshTexture);
+scene.add(boxMeshColor);
 }
 
 function createRenderer() {
