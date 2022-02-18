@@ -1,0 +1,26 @@
+{
+  "name": "react-three-demo",
+  "version": "1.0.0",
+  "description": "Basic React wrapper for Three.js",
+  "keywords": [
+    "react",
+    "three"
+  ],
+  "main": "src/index.js",
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "three": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
