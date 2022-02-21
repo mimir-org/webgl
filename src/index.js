@@ -2,6 +2,8 @@ import React, { Component as WebGlComponent } from "react";
 import ReactDOM from "react-dom";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js'
+import { TextGeometry} from 'three/examples/jsm/geometries/TextGeometry.js'
 
 const webGlContainerStyle = {
   height: 1200,
@@ -14,6 +16,7 @@ class App extends WebGlComponent {
     this.sceneSkybox();
     this.sceneLights();
     this.sceneCubeLocation();
+    this.sceneText();
     this.sceneCubeMagnus();
     this.sceneCubeErlend();
     this.sceneAnimationLoop();
@@ -52,7 +55,7 @@ class App extends WebGlComponent {
       new THREE.MeshBasicMaterial({
         map: loader.load("assets/images/skybox/earth_rt.jpg"), //right
         side: THREE.BackSide,
-      }), 
+      }),
       new THREE.MeshBasicMaterial({
         map: loader.load("assets/images/skybox/earth_lf.jpg"), //left
         side: THREE.BackSide,
@@ -98,7 +101,7 @@ class App extends WebGlComponent {
     this.scene.add(lights[2]);
   };
 
-   sceneCubeMagnus = () => {
+  sceneCubeMagnus = () => {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
     const material = new THREE.MeshPhongMaterial({
@@ -106,8 +109,8 @@ class App extends WebGlComponent {
       flatShading: true,
     });
     this.cubeMagnus = new THREE.Mesh(geometry, material);
-    this.cubeMagnus.position.x = -1;
-    this.cubeMagnus.scale.set(1, 1, 1);
+    this.cubeMagnus.position.x = -10;
+    this.cubeMagnus.scale.set(6, 6, 6);
     this.scene.add(this.cubeMagnus);
   };
 
@@ -119,29 +122,69 @@ class App extends WebGlComponent {
       flatShading: true,
     });
     this.cubeErlend = new THREE.Mesh(geometry, material);
-    this.cubeErlend.position.x = 1;
-    this.cubeErlend.scale.set(1, 1, 1);
+    this.cubeErlend.position.x = 10;
+    this.cubeErlend.scale.set(6, 6, 6);
     this.scene.add(this.cubeErlend);
   };
 
   sceneCubeLocation = () => {
-    const geometry = new THREE.BoxGeometry(10, 2.5, 10); //w/h/d
-    
+    const geometry = new THREE.BoxGeometry(60, 10, 40); //w/h/d
+
     const material = new THREE.MeshPhongMaterial({
       color: 0x156289,
       emissive: 0x072534,
       side: THREE.BackSide,
       flatShading: true,
     });
-    
+
     this.cubeLocation = new THREE.Mesh(geometry, material);
 
     this.camera.position.x = this.cubeLocation.position.x;
-    this.camera.position.y = this.cubeLocation.geometry.parameters.height; 
-    this.camera.position.z = this.cubeLocation.geometry.parameters.depth + this.camera.fov / 10; //TODO
-    this.camera.lookAt(this.cubeLocation.position.x, this.cubeLocation.position.y, this.cubeLocation.position.z)
+    this.camera.position.y = this.cubeLocation.geometry.parameters.height;
+    this.camera.position.z = this.cubeLocation.geometry.parameters.depth + this.camera.fov; //TODO
+    
+    this.camera.lookAt(
+      this.cubeLocation.position.x,
+      this.cubeLocation.position.y,
+      this.cubeLocation.position.z
+    );
 
     this.scene.add(this.cubeLocation);
+  };
+
+  sceneText = () => {
+    var loader = new FontLoader();
+    let scene = this.scene;
+    let cubeLocation = this.cubeLocation;
+    
+    loader.load(
+      'assets/fonts/helvetiker_regular.typeface.json',
+      function (font) {
+        var textGeo = new TextGeometry('Laboratory', {
+          font: font,
+          size: 10, // font size
+          height: 1, // how much extrusion (how thick / deep are the letters)
+          curveSegments: 50,
+          bevelThickness: 1,
+          bevelSize: 0.7,
+          bevelEnabled: true,
+        });
+        
+        textGeo.computeBoundingBox();
+        
+        var textMaterial = new THREE.MeshPhongMaterial({
+          color: 0x156289,
+          specular: 0x156289,
+        });
+        
+        var mesh = new THREE.Mesh(textGeo, textMaterial);
+        mesh.position.x = cubeLocation.position.x - 30;
+        mesh.position.y = cubeLocation.position.y + 10;
+        mesh.position.z = cubeLocation.position.z - 22;
+
+        scene.add(mesh);
+      }
+    );
   };
 
   sceneAnimationLoop = () => {
