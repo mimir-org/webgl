@@ -11,6 +11,7 @@ const webGlContainerStyle = {
 class App extends WebGlComponent {
   componentDidMount() {
     this.sceneSetup();
+    this.sceneSkybox();
     this.sceneLights();
     this.sceneCubeLocation();
     this.sceneCubeMagnus();
@@ -37,15 +38,53 @@ class App extends WebGlComponent {
       0.1, // near plane
       1000 // far plane
     );
-    
-    this.camera.position.x = 0; 
+
+    this.camera.position.x = 0;
     this.camera.position.y = 2;
-    this.camera.position.z = 7
+    this.camera.position.z = 7;
 
     this.controls = new OrbitControls(this.camera, this.mount);
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement); // mount using React ref
+  };
+
+  sceneSkybox = () => {
+    const loader = new THREE.TextureLoader();
+
+    const material = [
+      new THREE.MeshBasicMaterial({
+        map: loader.load("assets/images/skybox/earth_rt.jpg"), //right
+        side: THREE.BackSide,
+      }), 
+      new THREE.MeshBasicMaterial({
+        map: loader.load("assets/images/skybox/earth_lf.jpg"), //left
+        side: THREE.BackSide,
+      }),
+      new THREE.MeshBasicMaterial({
+        map: loader.load("assets/images/skybox/earth_up.jpg"), //top
+        side: THREE.BackSide,
+      }),
+      new THREE.MeshBasicMaterial({
+        map: loader.load("assets/images/skybox/earth_dn.jpg"), //bottom
+        side: THREE.BackSide,
+      }),
+      new THREE.MeshBasicMaterial({
+        map: loader.load("assets/images/skybox/earth_bk.jpg"), //front
+        side: THREE.BackSide,
+      }),
+      new THREE.MeshBasicMaterial({
+        map: loader.load("assets/images/skybox/earth_ft.jpg"), //back
+        side: THREE.BackSide,
+      }),
+    ];
+
+    const geometry = new THREE.BoxGeometry(100, 100, 100); //w/h/d
+    this.skyboxCube = new THREE.Mesh(geometry, material);
+    this.skyboxCube.position.x = this.camera.position.x;
+    this.skyboxCube.position.y = this.camera.position.y;
+    this.skyboxCube.position.z = this.camera.position.z;
+    this.scene.add(this.skyboxCube);
   };
 
   sceneLights = () => {
@@ -62,7 +101,7 @@ class App extends WebGlComponent {
     this.scene.add(lights[1]);
     this.scene.add(lights[2]);
   };
-  
+
   sceneCubeLocation = () => {
     const geometry = new THREE.BoxGeometry(5, 2.5, 3); //w/h/d
     const material = new THREE.MeshPhongMaterial({
@@ -79,8 +118,8 @@ class App extends WebGlComponent {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
     const material = new THREE.MeshPhongMaterial({
-    map: loader.load('assets/images/magnus.png'),
-    flatShading: true,
+      map: loader.load("assets/images/magnus.png"),
+      flatShading: true,
     });
     this.cubeMagnus = new THREE.Mesh(geometry, material);
     this.cubeMagnus.position.x = -1;
@@ -92,8 +131,8 @@ class App extends WebGlComponent {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
     const material = new THREE.MeshPhongMaterial({
-    map: loader.load('assets/images/erlend.png'),
-    flatShading: true,
+      map: loader.load("assets/images/erlend.png"),
+      flatShading: true,
     });
     this.cubeErlend = new THREE.Mesh(geometry, material);
     this.cubeErlend.position.x = 1;
@@ -104,10 +143,14 @@ class App extends WebGlComponent {
   sceneAnimationLoop = () => {
     this.cubeMagnus.rotation.x -= 0.005;
     this.cubeMagnus.rotation.y -= 0.008;
-    
+
     this.cubeErlend.rotation.x -= 0.008;
     this.cubeErlend.rotation.y -= 0.005;
-    
+
+    this.skyboxCube.position.x = this.camera.position.x;
+    this.skyboxCube.position.y = this.camera.position.y;
+    this.skyboxCube.position.z = this.camera.position.z;
+
     this.renderer.render(this.scene, this.camera);
     this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
   };
