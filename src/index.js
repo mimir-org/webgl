@@ -36,12 +36,8 @@ class App extends WebGlComponent {
       35, // fov
       width / height, // aspect
       0.1, // near plane
-      1000 // far plane
+      10000 // far plane
     );
-
-    this.camera.position.x = 0;
-    this.camera.position.y = 2;
-    this.camera.position.z = 7;
 
     this.controls = new OrbitControls(this.camera, this.mount);
     this.renderer = new THREE.WebGLRenderer();
@@ -79,7 +75,7 @@ class App extends WebGlComponent {
       }),
     ];
 
-    const geometry = new THREE.BoxGeometry(100, 100, 100); //w/h/d
+    const geometry = new THREE.BoxGeometry(5000, 5000, 5000); //w/h/d
     this.skyboxCube = new THREE.Mesh(geometry, material);
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
@@ -102,19 +98,7 @@ class App extends WebGlComponent {
     this.scene.add(lights[2]);
   };
 
-  sceneCubeLocation = () => {
-    const geometry = new THREE.BoxGeometry(5, 2.5, 3); //w/h/d
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x156289,
-      emissive: 0x072534,
-      side: THREE.BackSide,
-      flatShading: true,
-    });
-    this.cubeLocation = new THREE.Mesh(geometry, material);
-    this.scene.add(this.cubeLocation);
-  };
-
-  sceneCubeMagnus = () => {
+   sceneCubeMagnus = () => {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
     const material = new THREE.MeshPhongMaterial({
@@ -138,6 +122,26 @@ class App extends WebGlComponent {
     this.cubeErlend.position.x = 1;
     this.cubeErlend.scale.set(1, 1, 1);
     this.scene.add(this.cubeErlend);
+  };
+
+  sceneCubeLocation = () => {
+    const geometry = new THREE.BoxGeometry(10, 2.5, 10); //w/h/d
+    
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x156289,
+      emissive: 0x072534,
+      side: THREE.BackSide,
+      flatShading: true,
+    });
+    
+    this.cubeLocation = new THREE.Mesh(geometry, material);
+
+    this.camera.position.x = this.cubeLocation.position.x;
+    this.camera.position.y = this.cubeLocation.geometry.parameters.height; 
+    this.camera.position.z = this.cubeLocation.geometry.parameters.depth + this.camera.fov / 10; //TODO
+    this.camera.lookAt(this.cubeLocation.position.x, this.cubeLocation.position.y, this.cubeLocation.position.z)
+
+    this.scene.add(this.cubeLocation);
   };
 
   sceneAnimationLoop = () => {
