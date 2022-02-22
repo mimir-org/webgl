@@ -18,7 +18,7 @@ class App extends WebGlComponent {
     this.sceneCubeLocation();
     //this.sceneLocationCompass();
     this.sceneLocationGridLines();
-    this.sceneText("Laboratory");
+    //this.sceneText("Laboratory");
     //this.sceneCubeMagnus();
     //this.sceneCubeErlend();
     this.sceneAnimationLoop();
@@ -130,7 +130,7 @@ class App extends WebGlComponent {
   };
 
   sceneCubeLocation = () => {
-    const geometry = new THREE.BoxGeometry(10, 2.4, 5); //w/h/d
+    const geometry = new THREE.BoxGeometry(20, 2.6, 10); //w/h/d
 
     const material = new THREE.MeshPhongMaterial({
       color: 0x156289,
@@ -138,15 +138,16 @@ class App extends WebGlComponent {
       side: THREE.BackSide,
       flatShading: true,
       polygonOffset: true,
-      polygonOffsetFactor: 1, // positive value pushes polygon further away
+      polygonOffsetFactor: 1, 
       polygonOffsetUnits: 1,
     });
 
     this.cubeLocation = new THREE.Mesh(geometry, material);
 
-    this.camera.position.x = this.cubeLocation.position.x;
-    this.camera.position.y = this.cubeLocation.geometry.parameters.height + 2;
-    this.camera.position.z = this.cubeLocation.geometry.parameters.depth + 8; //TODO
+    const offsetZ = 10;
+    const offsetY = 3;
+    const cameraPosZ = Math.max(this.cubeLocation.geometry.parameters.width, this.cubeLocation.geometry.parameters.height, this.cubeLocation.geometry.parameters.depth);
+    this.camera.position.set( 0, this.cubeLocation.geometry.parameters.height * offsetY, cameraPosZ + offsetZ);
 
     this.camera.lookAt(
       this.cubeLocation.position.x,
@@ -243,6 +244,10 @@ class App extends WebGlComponent {
     var loader = new FontLoader();
     let scene = this.scene;
     let cubeLocation = this.cubeLocation;
+    
+    const locationWidth = this.cubeLocation.geometry.parameters.width;
+    const locationHeight = this.cubeLocation.geometry.parameters.height;
+    const locationDepth = this.cubeLocation.geometry.parameters.depth;
 
     loader.load(
       "assets/fonts/helvetiker_regular.typeface.json",
@@ -258,6 +263,7 @@ class App extends WebGlComponent {
         });
 
         textGeometry.computeBoundingBox();
+        textGeometry.center();
 
         var textMaterial = new THREE.MeshPhongMaterial({
           color: 0x156289,
@@ -265,11 +271,15 @@ class App extends WebGlComponent {
         });
 
         let locationTextMesh = new THREE.Mesh(textGeometry, textMaterial);
-        locationTextMesh.scale.set(0.1, 0.1, 0.1);
+        let t = locationWidth * 0.01;
+        locationTextMesh.scale.set(t, t, t);
+        var max = textGeometry.boundingBox.max;
+        var min = textGeometry.boundingBox.min;
+        
 
-        locationTextMesh.position.x = cubeLocation.position.x - 3.5; //TODO
-        locationTextMesh.position.y = cubeLocation.position.y + 1.5; //TODO
-        locationTextMesh.position.z = cubeLocation.position.z - 2.8; //TODO
+        locationTextMesh.position.x = cubeLocation.position.x; //TODO
+        locationTextMesh.position.y = cubeLocation.position.y + locationHeight; //TODO
+        locationTextMesh.position.z = cubeLocation.position.z - locationDepth / 2; //TODO
 
         scene.add(locationTextMesh);
       }
