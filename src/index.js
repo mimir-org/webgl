@@ -119,16 +119,18 @@ sceneGuiSetup = () => {
 
   sceneCubeMagnus = () => {
     const loader = new THREE.TextureLoader();
-    const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
+    const geometry = new THREE.BoxGeometry(1, 1, 0.01); //w/h/d
     
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/magnus.png"),
-      flatShading: true,
+      flatShading: true
     });
 
     this.cubeMagnus = new THREE.Mesh(geometry, material);
 
-    this.cubeMagnus.position.x = -2;
+    this.cubeMagnus.position.x = -1.5;
+    this.cubeMagnus.position.z = -this.LocationDepth / 2;
+    this.cubeMagnus.position.y = 0.3; //TODO
     this.cubeMagnus.scale.set(1, 1, 1);
 
     this.scene.add(this.cubeMagnus);
@@ -136,7 +138,7 @@ sceneGuiSetup = () => {
 
   sceneCubeErlend = () => {
     const loader = new THREE.TextureLoader();
-    const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
+    const geometry = new THREE.BoxGeometry(1, 1, 0.01); //w/h/d
     
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/erlend.png"),
@@ -145,7 +147,9 @@ sceneGuiSetup = () => {
 
     this.cubeErlend = new THREE.Mesh(geometry, material);
 
-    this.cubeErlend.position.x = 2;
+    this.cubeErlend.position.x = 1.5;
+    this.cubeErlend.position.z = -this.LocationDepth / 2;
+    this.cubeErlend.position.y = 0.3; //TODO
     this.cubeErlend.scale.set(1, 1, 1);
 
     this.scene.add(this.cubeErlend);
@@ -278,11 +282,10 @@ sceneGuiSetup = () => {
   };
 
   sceneAnimationLoop = () => {
-    this.cubeMagnus.rotation.x -= 0.005;
-    this.cubeMagnus.rotation.y -= 0.008;
-
-    this.cubeErlend.rotation.x -= 0.008;
-    this.cubeErlend.rotation.y -= 0.005;
+    // this.cubeMagnus.rotation.x -= 0.005;
+    // this.cubeMagnus.rotation.y -= 0.008;
+    // this.cubeErlend.rotation.x -= 0.008;
+    // this.cubeErlend.rotation.y -= 0.005;
 
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
