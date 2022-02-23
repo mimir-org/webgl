@@ -15,7 +15,7 @@ class App extends WebGlComponent {
     this.sceneSetup();
     this.sceneSkybox();
     this.sceneLights();
-    this.sceneCubeLocation();
+    this.sceneLocation();
     //this.sceneLocationCompass();
     this.sceneLocationGridLines();
     //this.sceneText("Laboratory");
@@ -129,8 +129,8 @@ class App extends WebGlComponent {
     this.scene.add(this.cubeErlend);
   };
 
-  sceneCubeLocation = () => {
-    const geometry = new THREE.BoxGeometry(20, 2.6, 10); //w/h/d
+  sceneLocation = () => {
+    const geometry = new THREE.BoxGeometry(20, 2.4, 10); //w/h/d
 
     const material = new THREE.MeshPhongMaterial({
       color: 0x156289,
@@ -138,116 +138,33 @@ class App extends WebGlComponent {
       side: THREE.BackSide,
       flatShading: true,
       polygonOffset: true,
-      polygonOffsetFactor: 1, 
+      polygonOffsetFactor: 1,
       polygonOffsetUnits: 1,
     });
 
-    this.cubeLocation = new THREE.Mesh(geometry, material);
-
+    this.Location = new THREE.Mesh(geometry, material);
+    this.LocationWidth = this.Location.geometry.parameters.width;
+    this.LocationDepth = this.Location.geometry.parameters.depth;
+    this.LocationHeight = this.Location.geometry.parameters.height;
+    
     const offsetZ = 10;
     const offsetY = 3;
-    const cameraPosZ = Math.max(this.cubeLocation.geometry.parameters.width, this.cubeLocation.geometry.parameters.height, this.cubeLocation.geometry.parameters.depth);
-    this.camera.position.set( 0, this.cubeLocation.geometry.parameters.height * offsetY, cameraPosZ + offsetZ);
+    const cameraPosZ = Math.max(this.LocationWidth, this.LocationHeight, this.LocationDepth);
 
-    this.camera.lookAt(
-      this.cubeLocation.position.x,
-      this.cubeLocation.position.y,
-      this.cubeLocation.position.z
-    );
+    this.camera.position.set(0, this.LocationHeight * offsetY, cameraPosZ + offsetZ);
+    this.camera.lookAt(this.Location.position.x, this.Location.position.y, this.Location.position.z);
 
-    this.scene.add(this.cubeLocation);
-  };
-
-  sceneLocationCompass = () => {
-    const width = this.cubeLocation.geometry.parameters.width;
-    const depth = this.cubeLocation.geometry.parameters.depth;
-    const radius = (width / depth) * 5;
-    const radials = 4;
-    const circles = 3;
-    const divisions = width + depth;
-    const helper = new THREE.PolarGridHelper(
-      radius,
-      radials,
-      circles,
-      divisions
-    );
-    helper.position.y = -this.cubeLocation.geometry.parameters.height / 2 + 0.1;
-    this.scene.add(helper);
-  };
-
-  sceneLocationGridLines = () => {
-    const locationWidth = this.cubeLocation.geometry.parameters.width;
-    const locationHeight = this.cubeLocation.geometry.parameters.height;
-    const locationDepth = this.cubeLocation.geometry.parameters.depth;
-
-    const x = -locationWidth / 2;
-    const y = -locationHeight / 2;
-    const z = locationDepth / 2;
-    const distance = 1;
-
-    //Horizontal lines along the x-axis (wall and floor)
-    for (let i = 0; i <= Math.ceil(locationWidth); i += distance) {
-      let points = [];
-      points.push(new THREE.Vector3(x + i, y + locationHeight, z)); //wall (near) top
-      points.push(new THREE.Vector3(x + i, y, z)); //floor (near)
-      points.push(new THREE.Vector3(x + i, y, -z)); //floor (far)
-      points.push(new THREE.Vector3(x + i, y + locationHeight, -z)); //wall (far) top
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x1e8ec6,
-        transparent: true,
-        opacity: 0.8,
-      });
-      const line = new THREE.Line(geometry, lineMaterial);
-      this.scene.add(line);
-    }
-
-    //Horizontal lines along the z-axis (wall and floor)
-    for (let i = 0; i < Math.ceil(locationDepth); i += distance) {
-      let points = [];
-      points.push(new THREE.Vector3(x, y + locationHeight, z - i)); //top near left
-      points.push(new THREE.Vector3(x, y, z - i)); //bottom near left
-      points.push(new THREE.Vector3(x + locationWidth, y, z - i)); //bottom near right
-      points.push(new THREE.Vector3(x + locationWidth, y + locationHeight, z - i)); //top near right
-
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x1e8ec6,
-        transparent: true,
-        opacity: 0.8,
-      });
-      const line = new THREE.Line(geometry, lineMaterial);
-      this.scene.add(line);
-    }
-
-    //Horizontal lines around all four walls
-    for (let i = 0; i < Math.ceil(locationHeight); i += distance) {
-      let points = [];
-      points.push(new THREE.Vector3(x, y + i, z)); //bottom near left
-      points.push(new THREE.Vector3(x + locationWidth, y + i, z)); //bottom near right
-      points.push(new THREE.Vector3(x + locationWidth, y + i, z - locationDepth)); //bottom far right
-      points.push(new THREE.Vector3(x, y + i, z - locationDepth)); //bottom far left
-      points.push(new THREE.Vector3(x, y + i, z)); //bottom near left
-
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0x1e8ec6,
-        transparent: true,
-        opacity: 0.8,
-      });
-      const line = new THREE.Line(geometry, lineMaterial);
-      this.scene.add(line);
-    }
+    this.scene.add(this.Location);
   };
 
   sceneText = (text) => {
     var loader = new FontLoader();
-    let scene = this.scene;
-    let cubeLocation = this.cubeLocation;
-    
-    const locationWidth = this.cubeLocation.geometry.parameters.width;
-    const locationHeight = this.cubeLocation.geometry.parameters.height;
-    const locationDepth = this.cubeLocation.geometry.parameters.depth;
+    const scene = this.scene;
+    const location = this.Location;
+
+    const locationWidth = this.LocationWidth;
+    const locationHeight = this.LocationHeight;
+    const locationDepth = this.LocationDepth;
 
     loader.load(
       "assets/fonts/helvetiker_regular.typeface.json",
@@ -270,21 +187,95 @@ class App extends WebGlComponent {
           specular: 0x156289,
         });
 
-        let locationTextMesh = new THREE.Mesh(textGeometry, textMaterial);
-        let t = locationWidth * 0.01;
-        locationTextMesh.scale.set(t, t, t);
+        let textMesh = new THREE.Mesh(textGeometry, textMaterial);
+        
+        const scaleFactor = 3 / (locationWidth + locationHeight + locationDepth);
+        textMesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
+        
         var max = textGeometry.boundingBox.max;
         var min = textGeometry.boundingBox.min;
-        
 
-        locationTextMesh.position.x = cubeLocation.position.x; //TODO
-        locationTextMesh.position.y = cubeLocation.position.y + locationHeight; //TODO
-        locationTextMesh.position.z = cubeLocation.position.z - locationDepth / 2; //TODO
+        textMesh.position.x = location.position.x; //TODO
+        textMesh.position.y = location.position.y + locationHeight - scaleFactor; //TODO
+        textMesh.position.z = location.position.z - locationDepth / 2; //TODO
 
-        scene.add(locationTextMesh);
+        scene.add(textMesh);
       }
     );
   };
+
+  sceneLocationCompass = () => {
+    const width = this.Location.geometry.parameters.width;
+    const depth = this.Location.geometry.parameters.depth;
+    const radius = (width / depth) * 5;
+    const radials = 4;
+    const circles = 3;
+    const divisions = width + depth;
+    const helper = new THREE.PolarGridHelper(
+      radius,
+      radials,
+      circles,
+      divisions
+    );
+    helper.position.y = -this.Location.geometry.parameters.height / 2 + 0.1;
+    this.scene.add(helper);
+  };
+
+  sceneLocationGridLines = () => {
+    const width = this.Location.geometry.parameters.width;
+    const height = this.Location.geometry.parameters.height;
+    const depth = this.Location.geometry.parameters.depth;
+    const distance = 1;
+
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: 0x1e8ec6,
+      transparent: false,
+      opacity: 0.8,
+    });
+
+    let x = -width / 2;
+    let y = -height / 2;
+    let z = depth / 2;
+
+    //Lines (near -> far) wall and floor (starting near left top)
+    for (let i = 0; i <= Math.ceil(width); i += distance) {
+      let points = [];
+      points.push(new THREE.Vector3(x + i, y + height, z)); //wall (near) top
+      points.push(new THREE.Vector3(x + i, y, z)); //floor (near)
+      points.push(new THREE.Vector3(x + i, y, -z)); //floor (far)
+      points.push(new THREE.Vector3(x + i, y + height, -z)); //wall (far) top
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const line = new THREE.Line(geometry, lineMaterial);
+      this.scene.add(line);
+    }
+
+    //Lines (left -> right) wall and floor (starting near left top)
+    for (let i = 0; i < Math.ceil(depth); i += distance) {
+      let points = [];
+      points.push(new THREE.Vector3(x, y + height, z - i)); //top near left
+      points.push(new THREE.Vector3(x, y, z - i)); //bottom near left
+      points.push(new THREE.Vector3(x + width, y, z - i)); //bottom near right
+      points.push(new THREE.Vector3(x + width, y + height, z - i)); //top near right
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const line = new THREE.Line(geometry, lineMaterial);
+      this.scene.add(line);
+    }
+
+    //Lines around all walls (starting near left bottom)
+    for (let i = 0; i < Math.ceil(height); i += distance) {
+      let points = [];
+      points.push(new THREE.Vector3(x, y + i, z)); //bottom near left
+      points.push(new THREE.Vector3(x + width, y + i, z)); //bottom near right
+      points.push(new THREE.Vector3(x + width, y + i, z - depth)); //bottom far right
+      points.push(new THREE.Vector3(x, y + i, z - depth)); //bottom far left
+      points.push(new THREE.Vector3(x, y + i, z)); //bottom near left
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const line = new THREE.Line(geometry, lineMaterial);
+      this.scene.add(line);
+    }
+  };
+
+  
 
   sceneAnimationLoop = () => {
     // this.cubeMagnus.rotation.x -= 0.005;
