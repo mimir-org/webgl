@@ -4,10 +4,12 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { GUI } from 'dat.gui';
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 const webGlContainerStyle = {
-  height: 1200,
-  width: 2200,
+  height: 1250,
+  width: 2230,
 };
 
 class App extends WebGlComponent {
@@ -16,11 +18,11 @@ class App extends WebGlComponent {
     this.sceneSkybox();
     this.sceneLights();
     this.sceneLocation();
-    //this.sceneLocationCompass();
     this.sceneLocationGridLines();
-    //this.sceneText("Laboratory");
-    //this.sceneCubeMagnus();
-    //this.sceneCubeErlend();
+    this.sceneText("Laboratory");
+    this.sceneCubeMagnus();
+    this.sceneCubeErlend();
+    this.sceneGuiSetup();
     this.sceneAnimationLoop();
     window.addEventListener("resize", this.windowResize);
   }
@@ -34,9 +36,8 @@ class App extends WebGlComponent {
   sceneSetup = () => {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
-
     this.scene = new THREE.Scene();
-
+    
     this.camera = new THREE.PerspectiveCamera(
       35, // fov
       width / height, // aspect
@@ -50,9 +51,20 @@ class App extends WebGlComponent {
     this.mount.appendChild(this.renderer.domElement); // mount using React ref
   };
 
+sceneGuiSetup = () => {
+  this.stats = Stats()
+  document.body.appendChild(this.stats.dom)
+  this.Gui = new GUI();
+
+  this.GuiLocationFolder = this.Gui.addFolder('Laboratory');
+  this.GuiLocationFolder.add(this.Location.geometry.parameters, 'width');
+  this.GuiLocationFolder.add(this.Location.geometry.parameters, 'depth');
+  this.GuiLocationFolder.add(this.Location.geometry.parameters, 'height');
+  this.GuiLocationFolder.open();
+};
+
   sceneSkybox = () => {
     const loader = new THREE.TextureLoader();
-
     const material = [
       new THREE.MeshBasicMaterial({
         map: loader.load("assets/images/skybox/earth_rt.jpg"), //right
@@ -82,9 +94,11 @@ class App extends WebGlComponent {
 
     const geometry = new THREE.BoxGeometry(5000, 5000, 5000); //w/h/d
     this.skyboxCube = new THREE.Mesh(geometry, material);
+    
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
+    
     this.scene.add(this.skyboxCube);
   };
 
@@ -106,26 +120,34 @@ class App extends WebGlComponent {
   sceneCubeMagnus = () => {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
+    
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/magnus.png"),
       flatShading: true,
     });
+
     this.cubeMagnus = new THREE.Mesh(geometry, material);
-    this.cubeMagnus.position.x = -10;
-    this.cubeMagnus.scale.set(6, 6, 6);
+
+    this.cubeMagnus.position.x = -2;
+    this.cubeMagnus.scale.set(1, 1, 1);
+
     this.scene.add(this.cubeMagnus);
   };
 
   sceneCubeErlend = () => {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
+    
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/erlend.png"),
       flatShading: true,
     });
+
     this.cubeErlend = new THREE.Mesh(geometry, material);
-    this.cubeErlend.position.x = 10;
-    this.cubeErlend.scale.set(6, 6, 6);
+
+    this.cubeErlend.position.x = 2;
+    this.cubeErlend.scale.set(1, 1, 1);
+
     this.scene.add(this.cubeErlend);
   };
 
@@ -191,9 +213,6 @@ class App extends WebGlComponent {
         
         const scaleFactor = 3 / (locationWidth + locationHeight + locationDepth);
         textMesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        
-        var max = textGeometry.boundingBox.max;
-        var min = textGeometry.boundingBox.min;
 
         textMesh.position.x = location.position.x; //TODO
         textMesh.position.y = location.position.y + locationHeight - scaleFactor; //TODO
@@ -202,23 +221,6 @@ class App extends WebGlComponent {
         scene.add(textMesh);
       }
     );
-  };
-
-  sceneLocationCompass = () => {
-    const width = this.Location.geometry.parameters.width;
-    const depth = this.Location.geometry.parameters.depth;
-    const radius = (width / depth) * 5;
-    const radials = 4;
-    const circles = 3;
-    const divisions = width + depth;
-    const helper = new THREE.PolarGridHelper(
-      radius,
-      radials,
-      circles,
-      divisions
-    );
-    helper.position.y = -this.Location.geometry.parameters.height / 2 + 0.1;
-    this.scene.add(helper);
   };
 
   sceneLocationGridLines = () => {
@@ -275,18 +277,18 @@ class App extends WebGlComponent {
     }
   };
 
-  
-
   sceneAnimationLoop = () => {
-    // this.cubeMagnus.rotation.x -= 0.005;
-    // this.cubeMagnus.rotation.y -= 0.008;
+    this.cubeMagnus.rotation.x -= 0.005;
+    this.cubeMagnus.rotation.y -= 0.008;
 
-    // this.cubeErlend.rotation.x -= 0.008;
-    // this.cubeErlend.rotation.y -= 0.005;
+    this.cubeErlend.rotation.x -= 0.008;
+    this.cubeErlend.rotation.y -= 0.005;
 
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
+
+    this.stats.update()
 
     this.renderer.render(this.scene, this.camera);
     this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
