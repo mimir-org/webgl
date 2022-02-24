@@ -113,9 +113,9 @@ class App extends WebGlComponent {
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
     this.cameraDegree = this.sceneCameraDegree();
+    compass.style.transform = `rotate(${-this.cameraDegree}deg)`;
 
     this.stats.update();
-    this.controls.update();
 
     this.renderer.render(this.scene, this.camera);
     this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
