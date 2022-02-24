@@ -4,8 +4,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
-import { GUI } from 'dat.gui';
-import Stats from 'three/examples/jsm/libs/stats.module';
+import { GUI } from "dat.gui";
+import Stats from "three/examples/jsm/libs/stats.module";
 
 const webGlContainerStyle = {
   height: 1250,
@@ -37,7 +37,7 @@ class App extends WebGlComponent {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
     this.scene = new THREE.Scene();
-    
+
     this.camera = new THREE.PerspectiveCamera(
       35, // fov
       width / height, // aspect
@@ -51,78 +51,82 @@ class App extends WebGlComponent {
     this.mount.appendChild(this.renderer.domElement); // mount using React ref
   };
 
-sceneGuiSetup = () => {
+  sceneGuiSetup = () => {
     this.stats = Stats();
     document.body.appendChild(this.stats.dom);
     this.Gui = new GUI();
 
     //Location
-    this.GuiLocationFolder = this.Gui.addFolder('Laboratory');
+    this.GuiLocationFolder = this.Gui.addFolder("Laboratory");
 
-    this.GuiLocationFolder.add(this.Location.geometry.parameters, 'width')
-    .name("Width:")
-    .domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, "width").name(
+      "Width:"
+    ).domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.add(this.Location.geometry.parameters, 'depth')
-    .name("Depth:")
-    .domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, "depth").name(
+      "Depth:"
+    ).domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.add(this.Location.geometry.parameters, 'height')
-    .name("Height:")
-    .domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(
+      this.Location.geometry.parameters,
+      "height"
+    ).name("Height:").domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.addColor(new GuiColorHelper(this.LocationLines.material,'color'),'value')
-        .name('Grid color')
-        .onChange(this.sceneAnimationLoop);
+    this.GuiLocationFolder.addColor(
+      new GuiColorHelper(this.LocationLines.material, "color"),
+      "value"
+    )
+      .name("Grid color")
+      .onChange(this.sceneAnimationLoop);
 
-    this.GuiLocationFolder.addColor(new GuiColorHelper(this.Location.material,'color'),'value')
-        .name('Room color')
-        .onChange(this.sceneAnimationLoop);
+    this.GuiLocationFolder.addColor(
+      new GuiColorHelper(this.Location.material, "color"),
+      "value"
+    )
+      .name("Room color")
+      .onChange(this.sceneAnimationLoop);
 
     this.GuiLocationFolder.open();
-
-    this.GuiCameraFolder = this.Gui.addFolder('Camera');
-    this.GuiCameraFolder.add(this.camera.position, 'x').name("X-position:").listen();
-    this.GuiCameraFolder.add(this.camera.position, 'y').name("Y-position:").listen();
-    this.GuiCameraFolder.add(this.camera.position, 'z').name("Z-position:").listen();
-    this.GuiCameraFolder.add(this.controls, 'getPolarAngle').name("Azimute angle:").listen();
     
-    let v = new THREE.Vector3(this.camera.position.x, this.camera.position.y, this.camera.position.z);
-    let angle = Math.atan2(v.z, v.x);
-    angle -= Math.PI * 0.5;
-    angle += angle < 0 ? Math.PI * 2 : 0; 
-    console.log(THREE.MathUtils.radToDeg(angle));
+    this.cameraDegree = 10;
 
+    this.GuiCameraFolder = this.Gui.addFolder("Camera");
+    this.GuiCameraFolder.add(this.camera.position, "x")
+      .name("X-position:")
+      .listen();
+    this.GuiCameraFolder.add(this.camera.position, "y")
+      .name("Y-position:")
+      .listen();
+    this.GuiCameraFolder.add(this.camera.position, "z")
+      .name("Z-position:")
+      .listen();
+    this.GuiCameraFolder.add(this, "cameraDegree")
+      .name("Degree:")
+      .listen();
 
-    // const controls = this.controls;
-    // controls.addEventListener( 'change', ( event ) => {
-    //  	console.log( 'Polar Angle:', this.controls.getPolarAngle() );
-    //   console.log( 'Azimuth Angle:', this.controls.getAzimuthalAngle() );
-    //   console.log( 'Distance', this.controls.object.position.distanceTo( this.controls.target ) );
-    // });
-
-    this.GuiCameraFolder.domElement.style.pointerEvents = "none"
+    this.GuiCameraFolder.domElement.style.pointerEvents = "none";
     this.GuiCameraFolder.open();
-};
+  };
 
-sceneAnimationLoop = () => {
-  this.skyboxCube.position.x = this.camera.position.x;
-  this.skyboxCube.position.y = this.camera.position.y;
-  this.skyboxCube.position.z = this.camera.position.z;
-  
-  this.stats.update();
-  this.controls.update();
+  sceneAnimationLoop = () => {
+    this.skyboxCube.position.x = this.camera.position.x;
+    this.skyboxCube.position.y = this.camera.position.y;
+    this.skyboxCube.position.z = this.camera.position.z;
+    this.cameraDegree = this.sceneCameraDegree();
 
-  let v = new THREE.Vector3(this.camera.position.x, this.camera.position.y, this.camera.position.z);
-  let angle = Math.atan2(v.z, v.x);
-  angle -= Math.PI * 0.5;
-  angle += angle < 0 ? Math.PI * 2 : 0; 
-  console.log(THREE.MathUtils.radToDeg(angle));
+    this.stats.update();
+    this.controls.update();
 
-  this.renderer.render(this.scene, this.camera);
-  this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
-};
+    this.renderer.render(this.scene, this.camera);
+    this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
+  };
 
+  sceneCameraDegree = () => {
+    let angle = Math.atan2(this.camera.position.z, this.camera.position.x);
+    angle -= Math.PI * 0.5;
+    angle += angle < 0 ? Math.PI * 2 : 0;
+    return THREE.MathUtils.radToDeg(angle);
+  };
 
   sceneSkybox = () => {
     const loader = new THREE.TextureLoader();
@@ -155,11 +159,11 @@ sceneAnimationLoop = () => {
 
     const geometry = new THREE.BoxGeometry(5000, 5000, 5000); //w/h/d
     this.skyboxCube = new THREE.Mesh(geometry, material);
-    
+
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
-    
+
     this.scene.add(this.skyboxCube);
   };
 
@@ -181,10 +185,10 @@ sceneAnimationLoop = () => {
   sceneCubeMagnus = () => {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 0.01); //w/h/d
-    
+
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/magnus.png"),
-      flatShading: true
+      flatShading: true,
     });
 
     this.cubeMagnus = new THREE.Mesh(geometry, material);
@@ -200,7 +204,7 @@ sceneAnimationLoop = () => {
   sceneCubeErlend = () => {
     const loader = new THREE.TextureLoader();
     const geometry = new THREE.BoxGeometry(1, 1, 0.01); //w/h/d
-    
+
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/erlend.png"),
       flatShading: true,
@@ -233,13 +237,25 @@ sceneAnimationLoop = () => {
     this.LocationWidth = this.Location.geometry.parameters.width;
     this.LocationDepth = this.Location.geometry.parameters.depth;
     this.LocationHeight = this.Location.geometry.parameters.height;
-    
+
     const offsetZ = 10;
     const offsetY = 3;
-    const cameraPosZ = Math.max(this.LocationWidth, this.LocationHeight, this.LocationDepth);
+    const cameraPosZ = Math.max(
+      this.LocationWidth,
+      this.LocationHeight,
+      this.LocationDepth
+    );
 
-    this.camera.position.set(0, this.LocationHeight * offsetY, cameraPosZ + offsetZ);
-    this.camera.lookAt(this.Location.position.x, this.Location.position.y, this.Location.position.z);
+    this.camera.position.set(
+      0,
+      this.LocationHeight * offsetY,
+      cameraPosZ + offsetZ
+    );
+    this.camera.lookAt(
+      this.Location.position.x,
+      this.Location.position.y,
+      this.Location.position.z
+    );
 
     this.scene.add(this.Location);
   };
@@ -275,12 +291,14 @@ sceneAnimationLoop = () => {
         });
 
         let textMesh = new THREE.Mesh(textGeometry, textMaterial);
-        
-        const scaleFactor = 3 / (locationWidth + locationHeight + locationDepth);
+
+        const scaleFactor =
+          3 / (locationWidth + locationHeight + locationDepth);
         textMesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
         textMesh.position.x = location.position.x; //TODO
-        textMesh.position.y = location.position.y + locationHeight - scaleFactor; //TODO
+        textMesh.position.y =
+          location.position.y + locationHeight - scaleFactor; //TODO
         textMesh.position.z = location.position.z - locationDepth / 2; //TODO
 
         scene.add(textMesh);
@@ -342,7 +360,6 @@ sceneAnimationLoop = () => {
     }
   };
 
-  
   windowResize = () => {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
