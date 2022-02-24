@@ -52,16 +52,77 @@ class App extends WebGlComponent {
   };
 
 sceneGuiSetup = () => {
-  this.stats = Stats()
-  document.body.appendChild(this.stats.dom)
-  this.Gui = new GUI();
+    this.stats = Stats();
+    document.body.appendChild(this.stats.dom);
+    this.Gui = new GUI();
 
-  this.GuiLocationFolder = this.Gui.addFolder('Laboratory');
-  this.GuiLocationFolder.add(this.Location.geometry.parameters, 'width');
-  this.GuiLocationFolder.add(this.Location.geometry.parameters, 'depth');
-  this.GuiLocationFolder.add(this.Location.geometry.parameters, 'height');
-  this.GuiLocationFolder.open();
+    //Location
+    this.GuiLocationFolder = this.Gui.addFolder('Laboratory');
+
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, 'width')
+    .name("Width:")
+    .domElement.style.pointerEvents = "none";
+
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, 'depth')
+    .name("Depth:")
+    .domElement.style.pointerEvents = "none";
+
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, 'height')
+    .name("Height:")
+    .domElement.style.pointerEvents = "none";
+
+    this.GuiLocationFolder.addColor(new GuiColorHelper(this.LocationLines.material,'color'),'value')
+        .name('Grid color')
+        .onChange(this.sceneAnimationLoop);
+
+    this.GuiLocationFolder.addColor(new GuiColorHelper(this.Location.material,'color'),'value')
+        .name('Room color')
+        .onChange(this.sceneAnimationLoop);
+
+    this.GuiLocationFolder.open();
+
+    this.GuiCameraFolder = this.Gui.addFolder('Camera');
+    this.GuiCameraFolder.add(this.camera.position, 'x').name("X-position:").listen();
+    this.GuiCameraFolder.add(this.camera.position, 'y').name("Y-position:").listen();
+    this.GuiCameraFolder.add(this.camera.position, 'z').name("Z-position:").listen();
+    this.GuiCameraFolder.add(this.controls, 'getPolarAngle').name("Azimute angle:").listen();
+    
+    let v = new THREE.Vector3(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+    let angle = Math.atan2(v.z, v.x);
+    angle -= Math.PI * 0.5;
+    angle += angle < 0 ? Math.PI * 2 : 0; 
+    console.log(THREE.MathUtils.radToDeg(angle));
+
+
+    // const controls = this.controls;
+    // controls.addEventListener( 'change', ( event ) => {
+    //  	console.log( 'Polar Angle:', this.controls.getPolarAngle() );
+    //   console.log( 'Azimuth Angle:', this.controls.getAzimuthalAngle() );
+    //   console.log( 'Distance', this.controls.object.position.distanceTo( this.controls.target ) );
+    // });
+
+    this.GuiCameraFolder.domElement.style.pointerEvents = "none"
+    this.GuiCameraFolder.open();
 };
+
+sceneAnimationLoop = () => {
+  this.skyboxCube.position.x = this.camera.position.x;
+  this.skyboxCube.position.y = this.camera.position.y;
+  this.skyboxCube.position.z = this.camera.position.z;
+  
+  this.stats.update();
+  this.controls.update();
+
+  let v = new THREE.Vector3(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+  let angle = Math.atan2(v.z, v.x);
+  angle -= Math.PI * 0.5;
+  angle += angle < 0 ? Math.PI * 2 : 0; 
+  console.log(THREE.MathUtils.radToDeg(angle));
+
+  this.renderer.render(this.scene, this.camera);
+  this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
+};
+
 
   sceneSkybox = () => {
     const loader = new THREE.TextureLoader();
@@ -251,8 +312,8 @@ sceneGuiSetup = () => {
       points.push(new THREE.Vector3(x + i, y, -z)); //floor (far)
       points.push(new THREE.Vector3(x + i, y + height, -z)); //wall (far) top
       const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const line = new THREE.Line(geometry, lineMaterial);
-      this.scene.add(line);
+      this.LocationLines = new THREE.Line(geometry, lineMaterial);
+      this.scene.add(this.LocationLines);
     }
 
     //Lines (left -> right) wall and floor (starting near left top)
@@ -281,22 +342,7 @@ sceneGuiSetup = () => {
     }
   };
 
-  sceneAnimationLoop = () => {
-    // this.cubeMagnus.rotation.x -= 0.005;
-    // this.cubeMagnus.rotation.y -= 0.008;
-    // this.cubeErlend.rotation.x -= 0.008;
-    // this.cubeErlend.rotation.y -= 0.005;
-
-    this.skyboxCube.position.x = this.camera.position.x;
-    this.skyboxCube.position.y = this.camera.position.y;
-    this.skyboxCube.position.z = this.camera.position.z;
-
-    this.stats.update()
-
-    this.renderer.render(this.scene, this.camera);
-    this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
-  };
-
+  
   windowResize = () => {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
@@ -329,6 +375,19 @@ class WebGlContainer extends React.Component {
         {isMounted && <div>Scroll to zoom, drag to rotate</div>}
       </>
     );
+  }
+}
+
+class GuiColorHelper {
+  constructor(object, prop) {
+    this.object = object;
+    this.prop = prop;
+  }
+  get value() {
+    return `#${this.object[this.prop].getHexString()}`;
+  }
+  set value(hexString) {
+    this.object[this.prop].set(hexString);
   }
 }
 
