@@ -63,66 +63,57 @@ class App extends WebGlComponent {
     //Location
     this.GuiLocationFolder = this.Gui.addFolder("Location");
 
-    this.GuiLocationFolder.add(this.Location, "name").name(
-      "Name:"
-    ).domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location, "name")
+    .name("Name:").domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.add(this.Location.geometry.parameters, "width").name(
-      "Width:"
-    ).domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, "width")
+    .name("Width (m):").domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.add(this.Location.geometry.parameters, "depth").name(
-      "Depth:"
-    ).domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, "depth")
+    .name("Depth (m):").domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.add(this.Location.geometry.parameters,
-      "height").name("Height:").domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location.geometry.parameters, "height")
+    .name("Height (m):").domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.addColor(
-      new GuiColorHelper(this.LocationLines.material, "color"),
-      "value") .name("Grid color").onChange(this.sceneAnimationLoop);
+    this.GuiLocationFolder.addColor(new GuiColorHelper(this.LocationLines.material, "color"), "value")
+    .name("Grid color").onChange(this.sceneAnimationLoop);
 
-    this.GuiLocationFolder.addColor(
-      new GuiColorHelper(this.Location.material, "color"),
-      "value"
-    )
-      .name("Room color")
-      .onChange(this.sceneAnimationLoop);
+    this.GuiLocationFolder.addColor(new GuiColorHelper(this.Location.material, "color"),"value")
+      .name("Room color").onChange(this.sceneAnimationLoop);
 
     this.GuiLocationFolder.open();
     
+    //Camera
     this.cameraDegree = "0";
-
     this.GuiCameraFolder = this.Gui.addFolder("Camera");
-    this.GuiCameraFolder.add(this.camera.position, "x")
-      .name("X-position:")
-      .listen();
-    this.GuiCameraFolder.add(this.camera.position, "y")
-      .name("Y-position:")
-      .listen();
-    this.GuiCameraFolder.add(this.camera.position, "z")
-      .name("Z-position:")
-      .listen();
-    this.GuiCameraFolder.add(this, "cameraDegree")
-      .name("Compass:")
-      .listen();
 
-    this.GuiCameraFolder.domElement.style.pointerEvents = "none";
+    this.GuiCameraFolder.add(this.camera.position, "x")
+      .name("X-position:").listen().domElement.style.pointerEvents = "none";
+
+    this.GuiCameraFolder.add(this.camera.position, "y")
+      .name("Y-position:").listen().domElement.style.pointerEvents = "none";
+
+    this.GuiCameraFolder.add(this.camera.position, "z")
+      .name("Z-position:").listen().domElement.style.pointerEvents = "none";
+
+    this.GuiCameraFolder.add(this, "cameraDegree")
+      .name("Compass:").listen().domElement.style.pointerEvents = "none";
+
     this.GuiCameraFolder.open();
 
+    //Scene
     this.GuiSceneFolder = this.Gui.addFolder("Scene");
 
     this.GuiSceneFolder.add(this.skyboxCube, "visible")
-      .name("Skybox:")
-      .listen();
+      .name("Skybox:").listen();
 
     this.GuiSceneFolder.add(this.cubeMagnus, "visible")
-      .name("Magnus:")
-      .listen();
+      .name("Magnus:").listen();
 
       this.GuiSceneFolder.add(this.cubeErlend, "visible")
-      .name("Erlend:")
-      .listen();
+      .name("Erlend:").listen();
+
+      this.GuiSceneFolder.open();
   };
 
   sceneAnimationLoop = () => {
