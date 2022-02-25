@@ -47,6 +47,10 @@ class App extends WebGlComponent {
 
     this.controls = new OrbitControls(this.camera, this.mount);
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    
     this.renderer.setSize(width, height);
     this.mount.appendChild(this.renderer.domElement); // mount using React ref
   };
@@ -67,17 +71,12 @@ class App extends WebGlComponent {
       "Depth:"
     ).domElement.style.pointerEvents = "none";
 
-    this.GuiLocationFolder.add(
-      this.Location.geometry.parameters,
-      "height"
-    ).name("Height:").domElement.style.pointerEvents = "none";
+    this.GuiLocationFolder.add(this.Location.geometry.parameters,
+      "height").name("Height:").domElement.style.pointerEvents = "none";
 
     this.GuiLocationFolder.addColor(
       new GuiColorHelper(this.LocationLines.material, "color"),
-      "value"
-    )
-      .name("Grid color")
-      .onChange(this.sceneAnimationLoop);
+      "value") .name("Grid color").onChange(this.sceneAnimationLoop);
 
     this.GuiLocationFolder.addColor(
       new GuiColorHelper(this.Location.material, "color"),
@@ -109,9 +108,18 @@ class App extends WebGlComponent {
   };
 
   sceneAnimationLoop = () => {
+    this.cubeMagnus.rotation.x += 0.010;
+    this.cubeMagnus.rotation.y += 0.008;
+    this.cubeMagnus.rotation.z += 0.006;
+
+    this.cubeErlend.rotation.x -= 0.010;
+    this.cubeErlend.rotation.y -= 0.008;
+    this.cubeErlend.rotation.z -= 0.006;
+    
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
+
     this.cameraDegree = this.sceneCameraDegree(false);
     compass.style.transform = `rotate(${-this.sceneCameraDegree(true)}deg)`;
 
@@ -186,18 +194,25 @@ class App extends WebGlComponent {
     lights[1] = new THREE.PointLight(0xffffff, 1, 0);
     lights[2] = new THREE.PointLight(0xffffff, 1, 0);
 
-    lights[0].position.set(0, 20, 20);
-    lights[1].position.set(90, 200, 100);
-    lights[2].position.set(-90, -200, -100);
+    lights[0].position.set(20, 15, -10);
+    lights[1].position.set(50, 200, 100);
+    lights[2].position.set(-50, -200, -100);
+
+    lights[0].castShadow = true;
 
     this.scene.add(lights[0]);
     this.scene.add(lights[1]);
     this.scene.add(lights[2]);
+
+    lights[0].shadow.mapSize.width = 2048; // default
+    lights[0].shadow.mapSize.height = 2048; // default
+    lights[0].shadow.camera.near = 0.5; // default
+    lights[0].shadow.camera.far = 500; // default
   };
 
   sceneCubeMagnus = () => {
     const loader = new THREE.TextureLoader();
-    const geometry = new THREE.BoxGeometry(1, 1, 0.01); //w/h/d
+    const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
 
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/magnus.png"),
@@ -205,9 +220,11 @@ class App extends WebGlComponent {
     });
 
     this.cubeMagnus = new THREE.Mesh(geometry, material);
+    this.cubeMagnus.castShadow = true; //default is false
+    this.cubeMagnus.receiveShadow = false; //default
 
-    this.cubeMagnus.position.x = -1.5;
-    this.cubeMagnus.position.z = -this.LocationDepth / 2;
+    this.cubeMagnus.position.x = -2.5;
+    this.cubeMagnus.position.z = this.Location.position.z;
     this.cubeMagnus.position.y = 0.3; //TODO
     this.cubeMagnus.scale.set(1, 1, 1);
 
@@ -216,7 +233,7 @@ class App extends WebGlComponent {
 
   sceneCubeErlend = () => {
     const loader = new THREE.TextureLoader();
-    const geometry = new THREE.BoxGeometry(1, 1, 0.01); //w/h/d
+    const geometry = new THREE.BoxGeometry(1, 1, 1); //w/h/d
 
     const material = new THREE.MeshPhongMaterial({
       map: loader.load("assets/images/erlend.png"),
@@ -224,9 +241,11 @@ class App extends WebGlComponent {
     });
 
     this.cubeErlend = new THREE.Mesh(geometry, material);
+    this.cubeErlend.castShadow = true; //default is false
+    this.cubeErlend.receiveShadow = false; //default
 
-    this.cubeErlend.position.x = 1.5;
-    this.cubeErlend.position.z = -this.LocationDepth / 2;
+    this.cubeErlend.position.x = 2.5;
+    this.cubeErlend.position.z = this.Location.position.z;
     this.cubeErlend.position.y = 0.3; //TODO
     this.cubeErlend.scale.set(1, 1, 1);
 
@@ -250,6 +269,7 @@ class App extends WebGlComponent {
     this.LocationWidth = this.Location.geometry.parameters.width;
     this.LocationDepth = this.Location.geometry.parameters.depth;
     this.LocationHeight = this.Location.geometry.parameters.height;
+    this.Location.receiveShadow = true;
 
     const offsetZ = 10;
     const offsetY = 3;
