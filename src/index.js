@@ -88,7 +88,7 @@ class App extends WebGlComponent {
 
     this.GuiLocationFolder.open();
     
-    this.cameraDegree = 10;
+    this.cameraDegree = "0";
 
     this.GuiCameraFolder = this.Gui.addFolder("Camera");
     this.GuiCameraFolder.add(this.camera.position, "x")
@@ -101,7 +101,7 @@ class App extends WebGlComponent {
       .name("Z-position:")
       .listen();
     this.GuiCameraFolder.add(this, "cameraDegree")
-      .name("Degree:")
+      .name("Compass:")
       .listen();
 
     this.GuiCameraFolder.domElement.style.pointerEvents = "none";
@@ -112,8 +112,8 @@ class App extends WebGlComponent {
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
-    this.cameraDegree = this.sceneCameraDegree();
-    compass.style.transform = `rotate(${-this.cameraDegree}deg)`;
+    this.cameraDegree = this.sceneCameraDegree(false);
+    compass.style.transform = `rotate(${-this.sceneCameraDegree(true)}deg)`;
 
     this.stats.update();
 
@@ -121,11 +121,24 @@ class App extends WebGlComponent {
     this.requestID = window.requestAnimationFrame(this.sceneAnimationLoop);
   };
 
-  sceneCameraDegree = () => {
+  sceneCameraDegree = (integer) => {
     let angle = Math.atan2(this.camera.position.z, this.camera.position.x);
     angle -= Math.PI * 0.5;
     angle += angle < 0 ? Math.PI * 2 : 0;
-    return THREE.MathUtils.radToDeg(angle);
+    let degree = Math.round(THREE.MathUtils.radToDeg(angle));
+
+    if(integer)
+      return degree;
+
+    if(degree == 0) return degree + "° N"
+    else if(degree > 0 && degree < 90) return degree + "° NE";
+    else if(degree == 90) return degree + "° E";
+    else if(degree > 90 && degree < 180) return degree + "° SE";
+    else if(degree == 180) return degree + "° S";
+    else if(degree > 180 && degree < 270) return degree + "° SW";
+    else if(degree == 270) return degree + "° W";
+    else if(degree > 270 && degree < 360) return degree + "° NW";
+    else return degree; 
   };
 
   sceneSkybox = () => {
