@@ -61,7 +61,11 @@ class App extends WebGlComponent {
     this.Gui = new GUI();
 
     //Location
-    this.GuiLocationFolder = this.Gui.addFolder("Laboratory");
+    this.GuiLocationFolder = this.Gui.addFolder("Location");
+
+    this.GuiLocationFolder.add(this.Location, "name").name(
+      "Name:"
+    ).domElement.style.pointerEvents = "none";
 
     this.GuiLocationFolder.add(this.Location.geometry.parameters, "width").name(
       "Width:"
@@ -105,17 +109,31 @@ class App extends WebGlComponent {
 
     this.GuiCameraFolder.domElement.style.pointerEvents = "none";
     this.GuiCameraFolder.open();
+
+    this.GuiSceneFolder = this.Gui.addFolder("Scene");
+
+    this.GuiSceneFolder.add(this.skyboxCube, "visible")
+      .name("Skybox:")
+      .listen();
+
+    this.GuiSceneFolder.add(this.cubeMagnus, "visible")
+      .name("Magnus:")
+      .listen();
+
+      this.GuiSceneFolder.add(this.cubeErlend, "visible")
+      .name("Erlend:")
+      .listen();
   };
 
   sceneAnimationLoop = () => {
     this.cubeMagnus.rotation.x += 0.010;
     this.cubeMagnus.rotation.y += 0.008;
     this.cubeMagnus.rotation.z += 0.006;
-
+    
     this.cubeErlend.rotation.x -= 0.010;
     this.cubeErlend.rotation.y -= 0.008;
     this.cubeErlend.rotation.z -= 0.006;
-    
+        
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
@@ -184,6 +202,7 @@ class App extends WebGlComponent {
     this.skyboxCube.position.x = this.camera.position.x;
     this.skyboxCube.position.y = this.camera.position.y;
     this.skyboxCube.position.z = this.camera.position.z;
+    this.skyboxCube.visible = false;
 
     this.scene.add(this.skyboxCube);
   };
@@ -227,6 +246,7 @@ class App extends WebGlComponent {
     this.cubeMagnus.position.z = this.Location.position.z;
     this.cubeMagnus.position.y = 0.3; //TODO
     this.cubeMagnus.scale.set(1, 1, 1);
+    this.cubeMagnus.visible = false;
 
     this.scene.add(this.cubeMagnus);
   };
@@ -248,6 +268,7 @@ class App extends WebGlComponent {
     this.cubeErlend.position.z = this.Location.position.z;
     this.cubeErlend.position.y = 0.3; //TODO
     this.cubeErlend.scale.set(1, 1, 1);
+    this.cubeErlend.visible = false;
 
     this.scene.add(this.cubeErlend);
   };
@@ -270,6 +291,8 @@ class App extends WebGlComponent {
     this.LocationDepth = this.Location.geometry.parameters.depth;
     this.LocationHeight = this.Location.geometry.parameters.height;
     this.Location.receiveShadow = true;
+
+    this.Location.name = "Laboratory";
 
     const offsetZ = 10;
     const offsetY = 3;
