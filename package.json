@@ -13,7 +13,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-scripts": "latest",
-    "three": "latest"
+    "three": "0.160.0"
   },
   "scripts": {
     "start": "react-scripts start",
